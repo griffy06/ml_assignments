@@ -62,7 +62,73 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+X=[ones(m,1) X];
+z1=Theta1*(X');
+a2=sigmoid(z1);
+a2=[ones(1,size(a2,2));a2];
+z2=Theta2*a2;
+a3=sigmoid(z2);
+a=0;
+for i=1:m
+   b=0;
+   for j=1:num_labels
+      if j==y(i,1)
+      h=1;
+      else 
+      h=0;
+      end
+      b=b+(h*log(a3(j,i)))+((1-h)*(log(1-a3(j,i))));
+    end
+    a=a+b;
+end
+J=(-1/m)*a;
 
+a=0;
+for i=1:size(Theta1,1)
+b=0;
+for j=2:size(Theta1,2)
+b=b+(Theta1(i,j)^2);
+end
+a=a+b;
+end
+
+
+c=0;
+for i=1:size(Theta2,1)
+b=0;
+for j=2:size(Theta2,2)
+b=b+(Theta2(i,j)^2);
+end
+c=c+b;
+end
+
+J=J+(lambda/(2*m))*(a+c);
+
+
+triangle1=zeros((size(Theta1,1)),size(Theta1,2));
+triangle2=zeros(size(Theta2,1),size(Theta2,2));
+
+
+for i=1:m
+  a1=X(i,:)';
+  z1=Theta1*a1;
+  a2=sigmoid(z1);
+  a2=[[1];a2];
+  z2=Theta2*a2;
+  a3=sigmoid(z2);
+  n=([1:num_labels]==y(i))';
+  
+  delta3=a3-n;
+  
+  delta2=(Theta2'*delta3).* a2.*(1-a2);
+  delta2=delta2(2:end);
+  triangle1=triangle1 + (delta2*(a1'));
+  triangle2=triangle2 + (delta3*(a2'));
+
+end
+
+Theta1_grad = (1/m) * triangle1 + (lambda/m) * [zeros(size(Theta1, 1), 1) Theta1(:,2:end)];
+Theta2_grad = (1/m) * triangle2 + (lambda/m) * [zeros(size(Theta2, 1), 1) Theta2(:,2:end)];
 
 
 
